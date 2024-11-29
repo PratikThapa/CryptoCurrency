@@ -12,18 +12,30 @@
     </header>
     <main>
         <h2>Available Cryptocurrencies</h2>
-        <div id="crypto-data" class="card-container"></div> 
+        <div id="crypto-data" class="card-container"></div>
         <section id="comparison-section">
             <h2>Comparison</h2>
-            <div id="comparison-list"></div> 
+            <div id="comparison-list"></div>
             <div class="button-container">
                 <button id="compare-button">Compare</button>
             </div>
         </section>
     </main>
+    
+     <!-- Dialog Box -->
+     <div id="dialog" class="dialog">
+        <div class="dialog-content">
+            <span class="close-button" onclick="closeDialog()">&times;</span>
+            <p>You can only select up to 5 cryptocurrencies.</p>
+            <button onclick="closeDialog()">OK</button>
+        </div>
+    </div>
+
     <footer>
         <p>© 2024 Cryptocurrency Tracker</p>
     </footer>
+
+   
     <script src="script.js"></script>
 </body>
 </html>

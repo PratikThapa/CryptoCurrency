@@ -36,21 +36,34 @@ function fetchCryptoData() {
 function displayCryptos(data) {
     const cryptoDataContainer = document.getElementById('crypto-data');
     cryptoDataContainer.innerHTML = '';
-    
+
     const fragment = document.createDocumentFragment();
 
     data.forEach(crypto => {
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
-            <input type="checkbox" id="${crypto.id}" ${selectedCryptos.includes(crypto.id) ? 'checked' : ''}>
+            <input type="checkbox" id="${crypto.id}" ${selectedCryptos.includes(crypto.id) ? 'checked' : ''} 
+            ${selectedCryptos.length >= 5 && !selectedCryptos.includes(crypto.id) ? 'disabled' : ''} 
+            onclick="limitSelection(this)">
             <label for="${crypto.id}">${crypto.name} (${crypto.symbol.toUpperCase()})</label>
             <div>Current Price: $${crypto.current_price.toFixed(2)}</div>
         `;
-        fragment.appendChild(card); // Append to fragment
+        fragment.appendChild(card);
     });
 
-    cryptoDataContainer.appendChild(fragment); // Append the fragment to the container
+    cryptoDataContainer.appendChild(fragment);
+}
+
+function limitSelection(checkbox) {
+    const checkboxes = document.querySelectorAll('#crypto-data input[type="checkbox"]');
+    if (checkbox.checked) {
+        const selectedCount = Array.from(checkboxes).filter(chk => chk.checked).length;
+        if (selectedCount > 5) {
+            checkbox.checked = false; // Uncheck the last selected checkbox
+            showDialog(); // Show the dialog box
+        }
+    }
 }
 
 function displayComparison() {
@@ -112,4 +125,13 @@ function hideLoadingIndicator() {
     if (loadingIndicator) {
         document.body.removeChild(loadingIndicator);
     }
+}
+
+// Dialog functions
+function showDialog() {
+    document.getElementById('dialog').style.display = 'block';
+}
+
+function closeDialog() {
+    document.getElementById('dialog').style.display = 'none';
 }
