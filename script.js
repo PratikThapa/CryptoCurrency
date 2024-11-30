@@ -1,40 +1,45 @@
 const apiUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false';
 
 let selectedCryptos = JSON.parse(localStorage.getItem('selectedCryptos')) || [];
-let cryptoDataCache = []; // Cache for fetched crypto data
-let isFetching = false; // Flag to prevent multiple fetches
+let data = []; 
+let isFetching = false; 
 
-document.addEventListener('DOMContentLoaded', () => {
-    fetchCryptoData();
+document.addEventListener('DOMContentLoaded', async () => {
+    await fetchCryptoData();
+    setInterval(async () => await fetchCryptoData(), 30000);
     loadSelectedCryptos();
     document.getElementById('compare-button').addEventListener('click', displayComparison);
-    setInterval(fetchCryptoData, 60000); // Fetch data every minute
+     
 });
 
-function fetchCryptoData() {
-    if (isFetching) return; // Prevent multiple fetches
-    isFetching = true; // Set flag to true
-
-    showLoadingIndicator(); // Show loading before fetch
-    fetch(apiUrl)
-        .then(response => {
+async function fetchCryptoData() {
+    try {
+        const localCache = localStorage.getItem("api-cache")
+        const cacheObj = JSON.parse(localCache)
+        data = []
+        if (localCache === null || (localCache !== null && Date.now() - cacheObj.ts > 30000)) {
+            //if there is no cache 
+            const response = await fetch (apiUrl)
             if (!response.ok) {
                 throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            cryptoDataCache = data; // Cache the fetched data
-            displayCryptos(data);
-        })
-        .catch(error => {
-            console.error('Error fetching crypto data:', error);
-            alert('Failed to fetch cryptocurrency data. Please try again later.');
-        })
-        .finally(() => {
-            hideLoadingIndicator();
-            isFetching = false; // Reset the flag after fetch is complete
-        });
+                
+             }
+             data = await response.json()
+             localStorage.setItem("api-cache", JSON.stringify({ "resp": data, "ts": Date.now() }))   
+        }
+        else{
+            //if there is cache
+            data = cacheObj.resp
+        }
+
+        displayCryptos(data);
+    } catch (error) {
+        console.error('Error fetching crypto data:', error);
+        alert('Failed to fetch cryptocurrency data. Please try again later.');
+    }
+    finally{
+        hideLoadingIndicator();
+    }
 }
 
 function displayCryptos(data) {
@@ -80,7 +85,6 @@ function displayComparison() {
         selectedCryptos.push(checkbox.id);
         
         const cryptoData = getCryptoDataById(checkbox.id);
-        
         const comparisonItem = document.createElement('div');
         comparisonItem.innerHTML = `
             <div class="comparison-header">${cryptoData.name} (${cryptoData.symbol.toUpperCase()})</div>
@@ -96,8 +100,9 @@ function displayComparison() {
     localStorage.setItem('selectedCryptos', JSON.stringify(selectedCryptos));
 }
 
+
 function getCryptoDataById(id) {
-    return cryptoDataCache.find(crypto => crypto.id === id);
+    return data.find(crypto => crypto.id === id);
 }
 
 function loadSelectedCryptos() {
