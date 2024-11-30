@@ -60,8 +60,8 @@ function limitSelection(checkbox) {
     if (checkbox.checked) {
         const selectedCount = Array.from(checkboxes).filter(chk => chk.checked).length;
         if (selectedCount > 5) {
-            checkbox.checked = false; // Uncheck the last selected checkbox
-            showDialog(); // Show the dialog box
+            checkbox.checked = false;
+            showDialog();
         }
     }
 }
