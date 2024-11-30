@@ -2,14 +2,19 @@ const apiUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&o
 
 let selectedCryptos = JSON.parse(localStorage.getItem('selectedCryptos')) || [];
 let cryptoDataCache = []; // Cache for fetched crypto data
+let isFetching = false; // Flag to prevent multiple fetches
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchCryptoData();
     loadSelectedCryptos();
     document.getElementById('compare-button').addEventListener('click', displayComparison);
+    setInterval(fetchCryptoData, 60000); // Fetch data every minute
 });
 
 function fetchCryptoData() {
+    if (isFetching) return; // Prevent multiple fetches
+    isFetching = true; // Set flag to true
+
     showLoadingIndicator(); // Show loading before fetch
     fetch(apiUrl)
         .then(response => {
@@ -19,7 +24,7 @@ function fetchCryptoData() {
             return response.json();
         })
         .then(data => {
-            cryptoDataCache = data;
+            cryptoDataCache = data; // Cache the fetched data
             displayCryptos(data);
         })
         .catch(error => {
@@ -28,8 +33,7 @@ function fetchCryptoData() {
         })
         .finally(() => {
             hideLoadingIndicator();
-            // Fetch data every minute
-            setTimeout(fetchCryptoData, 60000);
+            isFetching = false; // Reset the flag after fetch is complete
         });
 }
 
